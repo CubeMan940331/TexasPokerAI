@@ -39,7 +39,7 @@ def compute_counterfactual_regrets(players, payoffs, initial_stack, small_blind,
                     alt_amount = call_info["amount"]
                 elif alt_action == "raise":
                     raise_info = next(act for act in decision["valid_actions_detail"] if act["action"] == "raise")
-                    alt_amount = raise_info["amount"]["max"] if isinstance(raise_info["amount"], dict) else raise_info["amount"]
+                    alt_amount = int(raise_info["amount"]["max"]) if isinstance(raise_info["amount"], dict) else int(raise_info["amount"])
                 # Restore the game state at the decision point
                 game_state = restore_game_state(round_state)
                 # Attach known hole cards for each player to the game state

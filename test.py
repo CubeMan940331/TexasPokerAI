@@ -44,14 +44,22 @@ class StrategyPlayer(BasePokerPlayer):
             return "call", [a for a in valid_actions if a["action"] == "call"][0]["amount"]
         elif choice == "raise":
             raise_info = [a for a in valid_actions if a["action"] == "raise"][0]["amount"]
-            return "raise", raise_info["max"] if isinstance(raise_info, dict) else raise_info
-
+            return "raise", int(raise_info["max"]) if isinstance(raise_info, dict) else int(raise_info)
 
 # Define a simple random opponent
 class RandomPlayer(BasePokerPlayer):
     def declare_action(self, valid_actions, hole_card, round_state):
         action = random.choice(valid_actions)
-        return action["action"], action["amount"]
+        act_name = action["action"]
+        amt = action["amount"]
+        if act_name == "raise":
+            if isinstance(amt, dict):
+                amt = int(amt["max"])
+            else:
+                amt = int(amt)
+        else:
+            amt = int(amt)
+        return act_name, amt
 
     def receive_game_start_message(self, game_info):pass
     def receive_round_start_message(self, round_count, hole_card, seats): pass
