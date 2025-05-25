@@ -24,7 +24,7 @@ if __name__ == "__main__":
     ante = 0
     runner = CFRRunner(regret_net, strategy_net, initial_stack=initial_stack, small_blind=small_blind, ante=ante)
     # Hyperparameters for training
-    num_iterations = 10
+    num_iterations = 20
     episodes_per_iteration = 100
     regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.001)
     strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.001)

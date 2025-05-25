@@ -32,7 +32,7 @@ def train_strategy_network(strategy_net, strategy_memory, optimizer, batch_size=
         for i in range(0, len(strategy_memory.memory), batch_size):
             batch = strategy_memory.memory[i:i+batch_size]
             state_batch = torch.tensor(np.array([s for (s, _) in batch]), dtype=torch.float32)
-            target_batch = orch.tensor(np.array([dist for (_, dist) in batch]), dtype=torch.float32)
+            target_batch = torch.tensor(np.array([dist for (_, dist) in batch]), dtype=torch.float32)
             optimizer.zero_grad()
             pred_probs = strategy_net(state_batch)
             loss = ((pred_probs - target_batch) ** 2).mean()
