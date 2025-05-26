@@ -54,7 +54,12 @@ class RandomPlayer(BasePokerPlayer):
         amt = action["amount"]
         if act_name == "raise":
             if isinstance(amt, dict):
-                amt = int(amt["min"])
+                min_raise = int(amt["min"])
+                max_raise = int(amt["max"])
+                if min_raise >= max_raise:
+                    amt = min_raise
+                else:
+                    amt = random.randint(min_raise, max_raise)
             else:
                 amt = int(amt)
         else:

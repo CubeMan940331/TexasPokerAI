@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import random
 
 def train_regret_network(regret_net, regret_memory, optimizer, batch_size=128, epochs=1):
     """
