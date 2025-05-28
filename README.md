@@ -24,5 +24,13 @@ Then, execute the game by typing
 python3 test.py
 ```
 
+## GUI的使用
+
+
+```
+python -m pypokergui serve ./poker_conf.yaml --port 8000 --speed fast
+```
+Then you can use GUI.
+
 ## Reference
 [Pypokerengine](https://github.com/ishikota/PyPokerEngine)
