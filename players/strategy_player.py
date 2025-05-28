@@ -42,10 +42,9 @@ class StrategyPlayer(BasePokerPlayer):
             raise_info = [a for a in valid_actions if a["action"] == "raise"][0]["amount"]
             return "raise", int(raise_info["max"]) if isinstance(raise_info, dict) else int(raise_info)
 
-# Load the trained strategy_net
-strategy_net = StrategyNet(input_dim=113)
-strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
-strategy_net.eval()
-
 def setup_ai():
+    # Load the trained strategy_net
+    strategy_net = StrategyNet(input_dim=113)
+    strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
+    strategy_net.eval()
     return StrategyPlayer(strategy_net)
