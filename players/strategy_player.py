@@ -40,7 +40,7 @@ class StrategyPlayer(BasePokerPlayer):
             return "call", [a for a in valid_actions if a["action"] == "call"][0]["amount"]
         elif choice == "raise":
             raise_info = [a for a in valid_actions if a["action"] == "raise"][0]["amount"]
-            return "raise", int(raise_info["max"]) if isinstance(raise_info, dict) else int(raise_info)
+            return "raise", raise_info
 
 def setup_ai():
     # Load the trained strategy_net

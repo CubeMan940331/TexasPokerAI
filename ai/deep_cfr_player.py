@@ -85,10 +85,7 @@ class DeepCFRPlayer(BasePokerPlayer):
         elif chosen_action == 'raise':
             # Use the maximum raise amount (e.g., all-in) for raising
             raise_info = next(act for act in valid_actions if act["action"] == "raise")
-            if isinstance(raise_info["amount"], dict):
-                chosen_amount = int(raise_info["amount"]["max"])
-            else:
-                chosen_amount = int(raise_info["amount"])
+            chosen_amount = raise_info["amount"]
         # Log the decision if not in a simulation (real gameplay)
         if not self.simulating:
             state_snapshot = copy.deepcopy(round_state)  # store state for regret simulation
@@ -97,7 +94,7 @@ class DeepCFRPlayer(BasePokerPlayer):
                 "state_vec": state_vec,
                 "strategy": strategy_vec,
                 "action": chosen_action,
-                "raise_amount": None if chosen_action != 'raise' else chosen_amount,
+                "raise_amount": chosen_amount,
                 "valid_actions": allowed_actions,
                 "valid_actions_detail": copy.deepcopy(valid_actions),
                 "round_state": state_snapshot,
@@ -106,6 +103,8 @@ class DeepCFRPlayer(BasePokerPlayer):
         # print("== DECLARE_ACTION ==")
         # print("Valid actions:", valid_actions)
         # print("Hole cards:", hole_card)
+        # print("action: ", chosen_action)
+        # print("raise_amount: ", chosen_amount)
         # print("Round state:", round_state.get('street'))
         return chosen_action, chosen_amount
 

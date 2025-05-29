@@ -31,8 +31,8 @@ if __name__ == "__main__":
     ante = 0
     runner = CFRRunner(regret_net, strategy_net, initial_stack=initial_stack, small_blind=small_blind, ante=ante)
     # Hyperparameters for training
-    num_iterations = 8
-    episodes_per_iteration = 200
+    num_iterations = 4
+    episodes_per_iteration = 100
     regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.0001)
     strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.0001)
     # Deep CFR training loop
@@ -53,6 +53,7 @@ if __name__ == "__main__":
             for p in players:
                 for decision in p.episode_history:
                     strategy_memory.add(decision["state_vec"], decision["strategy"])
+                    # print(decision["state_vec"], decision["strategy"])
         # Train the regret network on collected regret samples
         if len(regret_memory) > 0:
             loss_fn = nn.MSELoss()
@@ -69,7 +70,7 @@ if __name__ == "__main__":
                 regret_optimizer.step()
         # Clear regret memory (do not carry over to next iteration)
         regret_memory.clear()
-        print(f"Iteration {it+1}/{num_iterations} complete.")
+        # print(f"Iteration {it+1}/{num_iterations} complete.")
     # After iterations, train the strategy network on all accumulated strategy samples (average strategy)
     if len(strategy_memory) > 0:
         batch_size = 128
