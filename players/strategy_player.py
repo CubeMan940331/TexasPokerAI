@@ -33,7 +33,8 @@ class StrategyPlayer(BasePokerPlayer):
             strategy = {a: v / total for a, v in strategy.items()}
 
         choice = random.choices(list(strategy.keys()), weights=strategy.values(), k=1)[0]
-
+        print(probs)
+        print(choice)
         if choice == "fold":
             return "fold", 0
         elif choice == "call":
@@ -44,7 +45,7 @@ class StrategyPlayer(BasePokerPlayer):
 
 def setup_ai():
     # Load the trained strategy_net
-    strategy_net = StrategyNet(input_dim=113)
+    strategy_net = StrategyNet(input_dim=112)
     strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
     strategy_net.eval()
     return StrategyPlayer(strategy_net)

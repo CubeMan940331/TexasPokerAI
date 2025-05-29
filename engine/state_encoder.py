@@ -57,15 +57,7 @@ def encode_state(player_uuid, hole_cards, round_state):
                 my_stack = float(seat['stack'])
             else:
                 opp_stack = float(seat.get('stack', 0))
-    is_dealer = 0.0
-    dealer_index = round_state.get('dealer_btn')
-    if seats and dealer_index is not None:
-        for i, seat in enumerate(seats):
-            if seat['uuid'] == player_uuid:
-                if i == dealer_index:
-                    is_dealer = 1.0
-                break
-    numeric_features = np.array([my_stack, opp_stack, float(pot), float(call_amount), is_dealer], dtype=np.float32)
+    numeric_features = np.array([my_stack, opp_stack, float(pot), float(call_amount)], dtype=np.float32)
     # Concatenate all parts: hole cards, board cards, street, numeric features
     state_vector = np.concatenate([hole_vec, board_vec, street_vec, numeric_features])
     return state_vector

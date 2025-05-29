@@ -10,7 +10,7 @@ from players.fish_player import FishPlayer
 from tqdm import tqdm
 
 # Load the trained strategy_net
-strategy_net = StrategyNet(input_dim=113)
+strategy_net = StrategyNet(input_dim=112)
 strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
 strategy_net.eval()
 

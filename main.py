@@ -19,7 +19,7 @@ def compute_accuracy(pred_probs, target_probs):
     return correct / len(pred_actions)
 
 if __name__ == "__main__":
-    input_dim = 113  # state vector length (52 hole + 52 board + 4 street + 5 numeric features)
+    input_dim = 112  # state vector length (52 hole + 52 board + 4 street + 5 numeric features)
     regret_net = RegretNet(input_dim)
     strategy_net = StrategyNet(input_dim)
     # Initialize replay memories for regret and strategy samples
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     runner = CFRRunner(regret_net, strategy_net, initial_stack=initial_stack, small_blind=small_blind, ante=ante)
     # Hyperparameters for training
     num_iterations = 4
-    episodes_per_iteration = 100
+    episodes_per_iteration = 10
     regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.0001)
     strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.0001)
     # Deep CFR training loop
