@@ -7,18 +7,23 @@ from engine.state_encoder import encode_state
 from players.strategy_player import StrategyPlayer
 from players.random_player import RandomPlayer
 from players.fish_player import FishPlayer
+from players.console_player import ConsolePlayer
 from tqdm import tqdm
 
+'''
 # Load the trained strategy_net
 strategy_net = StrategyNet(input_dim=112)
 strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
 strategy_net.eval()
+'''
 
 # Configure game
 config = setup_config(max_round=100, initial_stack=1000, small_blind_amount=10)
-config.register_player(name="StrategyAI", algorithm=StrategyPlayer(strategy_net))
+# config.register_player(name="StrategyAI", algorithm=StrategyPlayer(strategy_net))
 # config.register_player(name="RandomAI", algorithm=RandomPlayer())
-config.register_player(name="Fish1", algorithm=FishPlayer())
+# config.register_player(name="Fish1", algorithm=FishPlayer())
+config.register_player(name="test0", algorithm=ConsolePlayer("test0"))
+config.register_player(name="test1", algorithm=ConsolePlayer("test1"))
 
 # Start the game
 result = start_poker(config, verbose=1)
@@ -27,7 +32,7 @@ result = start_poker(config, verbose=1)
 print("\n=== Game Result ===")
 for player in result["players"]:
     print(f"{player['name']} - Final Stack: {player['stack']}")
-
+'''
 # Play 100 full matches (until one player has 0 stack)
 strategy_full_wins = 0
 total_matches = 1000
@@ -50,3 +55,4 @@ for match in tqdm(range(total_matches)):
 print("\n=== Match Summary ===")
 print(f"Total matches: {total_matches}")
 print(f"StrategyAI full wins (opponent busted): {strategy_full_wins}")
+'''
