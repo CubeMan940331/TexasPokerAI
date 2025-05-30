@@ -10,7 +10,7 @@ from players.fish_player import FishPlayer
 from tqdm import tqdm
 
 # Load the trained strategy_net
-strategy_net = StrategyNet(input_dim=112)
+strategy_net = StrategyNet(input_dim=113)
 strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
 strategy_net.eval()
 
@@ -29,24 +29,24 @@ for player in result["players"]:
     print(f"{player['name']} - Final Stack: {player['stack']}")
 
 # Play 100 full matches (until one player has 0 stack)
-strategy_full_wins = 0
-total_matches = 1000
-initial_stack = 1000
-small_blind = 10
+# strategy_full_wins = 0
+# total_matches = 1000
+# initial_stack = 1000
+# small_blind = 10
 
-for match in tqdm(range(total_matches)):
-    config = setup_config(max_round=1000000000, initial_stack=1000, small_blind_amount=10)
-    config.register_player(name="AI", algorithm=StrategyPlayer(strategy_net))
-    config.register_player(name="Fish", algorithm=FishPlayer())
+# for match in tqdm(range(total_matches)):
+#     config = setup_config(max_round=1000000000, initial_stack=1000, small_blind_amount=10)
+#     config.register_player(name="AI", algorithm=StrategyPlayer(strategy_net))
+#     config.register_player(name="Fish", algorithm=FishPlayer())
 
-    result = start_poker(config, verbose=0)
+#     result = start_poker(config, verbose=0)
 
-    # print(f"match {match+1} result:")
-    for player in result["players"]:
-        if player['name']=='AI' and player['stack']>0: strategy_full_wins+=1
-        # print(f"{player['name']} - Final Stack: {player['stack']}")
+#     # print(f"match {match+1} result:")
+#     for player in result["players"]:
+#         if player['name']=='AI' and player['stack']>0: strategy_full_wins+=1
+#         # print(f"{player['name']} - Final Stack: {player['stack']}")
 
-# Print summary
-print("\n=== Match Summary ===")
-print(f"Total matches: {total_matches}")
-print(f"StrategyAI full wins (opponent busted): {strategy_full_wins}")
+# # Print summary
+# print("\n=== Match Summary ===")
+# print(f"Total matches: {total_matches}")
+# print(f"StrategyAI full wins (opponent busted): {strategy_full_wins}")

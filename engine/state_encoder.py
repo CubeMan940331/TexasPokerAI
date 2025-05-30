@@ -17,7 +17,7 @@ def card_to_index(card_str):
     rank = card_str[1]
     return 13 * suit_to_index[suit] + rank_to_index[rank]
 
-def encode_state(player_uuid, hole_cards, round_state):
+def encode_state(player_uuid, hole_cards, round_state, valid_actions_detail):
     """
     Encodes the current game state and player's private cards into a fixed-length vector.
     - player_uuid (str): UUID of the current player (whose perspective we encode).
@@ -27,6 +27,7 @@ def encode_state(player_uuid, hole_cards, round_state):
         np.ndarray: 1D float array representing the encoded state.
     """
     # One-hot encode hole cards (52-length vector)
+    initial = 1000
     hole_vec = np.zeros(52, dtype=np.float32)
     for card in hole_cards:
         idx = card_to_index(card)
@@ -45,19 +46,25 @@ def encode_state(player_uuid, hole_cards, round_state):
         street_idx = street_list.index(street)
         street_vec[street_idx] = 1.0
     # Numeric features: pot size, call amount (if any), player stacks, and dealer indicator
-    pot = round_state['pot']['main']['amount']
+    pot = round_state['pot']['main']['amount'] / initial
     call_amount = 0.0  # Default 0 (if no call needed)
     # We derive my_stack and opp_stack from round_state['seats']
     my_stack = 0.0
     opp_stack = 0.0
+    for act in valid_actions_detail:
+        if act['action'] == 'call':
+            call_amount = float(act['amount']) / initial
+        elif act['action'] == 'raise':
+            raise_amount = float(act['amount']) / initial
     seats = round_state.get('seats')
     if seats:
         for seat in seats:
             if seat['uuid'] == player_uuid:
-                my_stack = float(seat['stack'])
+                my_stack = float(seat['stack']) / initial
             else:
-                opp_stack = float(seat.get('stack', 0))
-    numeric_features = np.array([my_stack, opp_stack, float(pot), float(call_amount)], dtype=np.float32)
+                opp_stack = float(seat.get('stack', 0)) / initial
+    numeric_features = np.array([my_stack, opp_stack, float(pot), float(call_amount), float(raise_amount)], dtype=np.float32)
+    # print(numeric_features)
     # Concatenate all parts: hole cards, board cards, street, numeric features
     state_vector = np.concatenate([hole_vec, board_vec, street_vec, numeric_features])
     return state_vector

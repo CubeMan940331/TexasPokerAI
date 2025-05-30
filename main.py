@@ -12,14 +12,14 @@ from memory.strategy_memory import StrategyMemory
 from engine.runner import CFRRunner
 from traverse.traverse import compute_counterfactual_regrets
 
-def compute_accuracy(pred_probs, target_probs):
-    pred_actions = torch.argmax(pred_probs, dim=1)
-    target_actions = torch.argmax(target_probs, dim=1)
-    correct = (pred_actions == target_actions).sum().item()
-    return correct / len(pred_actions)
+# def compute_accuracy(pred_probs, target_probs):
+#     pred_actions = torch.argmax(pred_probs, dim=1)
+#     target_actions = torch.argmax(target_probs, dim=1)
+#     correct = (pred_actions == target_actions).sum().item()
+#     return correct / len(pred_actions)
 
 if __name__ == "__main__":
-    input_dim = 112  # state vector length (52 hole + 52 board + 4 street + 5 numeric features)
+    input_dim = 113  # state vector length (52 hole + 52 board + 4 street + 4 numeric features)
     regret_net = RegretNet(input_dim)
     strategy_net = StrategyNet(input_dim)
     # Initialize replay memories for regret and strategy samples
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     runner = CFRRunner(regret_net, strategy_net, initial_stack=initial_stack, small_blind=small_blind, ante=ante)
     # Hyperparameters for training
     num_iterations = 4
-    episodes_per_iteration = 10
+    episodes_per_iteration = 100
     regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.0001)
     strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.0001)
     # Deep CFR training loop
@@ -63,9 +63,9 @@ if __name__ == "__main__":
                 batch = regret_memory.memory[i:i+batch_size]
                 state_batch = torch.tensor(np.array([s for (s, _) in batch]), dtype=torch.float32)
                 target_regret_batch = torch.tensor(np.array([r for (_, r) in batch]), dtype=torch.float32)
-                regret_optimizer.zero_grad()
                 pred_regret = regret_net(state_batch)
                 loss = loss_fn(pred_regret, target_regret_batch)
+                regret_optimizer.zero_grad()
                 loss.backward()
                 regret_optimizer.step()
         # Clear regret memory (do not carry over to next iteration)
@@ -74,6 +74,8 @@ if __name__ == "__main__":
     # After iterations, train the strategy network on all accumulated strategy samples (average strategy)
     if len(strategy_memory) > 0:
         batch_size = 128
+        # for s, pi in strategy_memory.memory[:10]:
+        #     print(pi)
         for epoch in range(3):
             total_loss = 0.0
             total_acc = 0.0
@@ -82,18 +84,17 @@ if __name__ == "__main__":
                 batch = strategy_memory.memory[i:i+batch_size]
                 state_batch = torch.tensor(np.array([s for (s, _) in batch]), dtype=torch.float32)
                 target_strategy_batch = torch.tensor(np.array([dist for (_, dist) in batch]), dtype=torch.float32)
-                strategy_optimizer.zero_grad()
                 pred = strategy_net(state_batch)
-                loss = nn.KLDivLoss(reduction='batchmean')(
-                    torch.log(pred + 1e-8), target_strategy_batch)
-                acc = compute_accuracy(pred, target_strategy_batch)
+                loss = nn.MSELoss()(pred, target_strategy_batch)
+                # acc = compute_accuracy(pred, target_strategy_batch)
+                strategy_optimizer.zero_grad()
                 loss.backward()
                 strategy_optimizer.step()
-                total_loss += loss.item()
-                total_acc += acc
-            avg_loss = total_loss / (len(strategy_memory.memory) / batch_size)
-            avg_acc = total_acc / (len(strategy_memory.memory) / batch_size)
-            print(f"[Strategy Epoch {epoch+1}] Loss: {avg_loss:.4f}, Accuracy: {avg_acc*100:.2f}%")
+            #     total_loss += loss.item()
+            #     total_acc += acc
+            # avg_loss = total_loss / (len(strategy_memory.memory) / batch_size)
+            # avg_acc = total_acc / (len(strategy_memory.memory) / batch_size)
+            # print(f"[Strategy Epoch {epoch+1}] Loss: {avg_loss:.4f}, Accuracy: {avg_acc*100:.2f}%")
     # Training complete. The strategy_net can now be used for decisions or evaluation.
     os.makedirs("models", exist_ok=True)
     torch.save(strategy_net.state_dict(), "models/strategy_net.pt")

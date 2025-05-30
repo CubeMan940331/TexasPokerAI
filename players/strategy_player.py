@@ -17,24 +17,20 @@ class StrategyPlayer(BasePokerPlayer):
     def receive_game_start_message(self, game_info): pass
 
     def declare_action(self, valid_actions, hole_card, round_state):
-        state_vec = encode_state(self.uuid, hole_card, round_state)
+        state_vec = encode_state(self.uuid, hole_card, round_state, valid_actions)
         state_tensor = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)
         probs = self.model(state_tensor).detach().numpy()[0]
 
         legal_actions = [a["action"] for a in valid_actions]
         all_actions = ["raise", "call", "fold"]
 
-        # Build masked strategy
-        strategy = {a: probs[i] if a in legal_actions else 0.0 for i, a in enumerate(all_actions)}
-        total = sum(strategy.values())
-        if total == 0:
-            strategy = {a: 1.0 / len(legal_actions) for a in legal_actions}
-        else:
-            strategy = {a: v / total for a, v in strategy.items()}
+        masked = {act: probs[i] if act in legal_actions else -1.0
+                  for i, act in enumerate(all_actions)}
 
-        choice = random.choices(list(strategy.keys()), weights=strategy.values(), k=1)[0]
+        choice = max(masked, key=lambda act: masked[act])
+
         print(probs)
-        print(choice)
+        # print(choice)
         if choice == "fold":
             return "fold", 0
         elif choice == "call":
@@ -45,7 +41,7 @@ class StrategyPlayer(BasePokerPlayer):
 
 def setup_ai():
     # Load the trained strategy_net
-    strategy_net = StrategyNet(input_dim=112)
+    strategy_net = StrategyNet(input_dim=113)
     strategy_net.load_state_dict(torch.load("models/strategy_net.pt"))
     strategy_net.eval()
     return StrategyPlayer(strategy_net)
