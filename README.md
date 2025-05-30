@@ -34,7 +34,7 @@ git clone https://github.com/DoobieD00/PyPokerGUI.git
 pip install -e .
 python3 -m pypokergui serve ./poker_conf.yaml --port 8000 --speed fast
 ```
-Then you can use GUI.
+Then you can use GUI [here](http://localhost:8000/).
 
 fish player : always call
 
