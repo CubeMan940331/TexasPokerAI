@@ -32,9 +32,11 @@ python3 test.py
 ```
 git clone https://github.com/DoobieD00/PyPokerGUI.git
 pip install -e .
-python -m pypokergui serve ./poker_conf.yaml --port 8000 --speed fast
+python3 -m pypokergui serve ./poker_conf.yaml --port 8000 --speed fast
 ```
 Then you can use GUI.
+fish player : always call
+strategy player : our agent
 
 ## Reference
 [Pypokerengine](https://github.com/ishikota/PyPokerEngine)
