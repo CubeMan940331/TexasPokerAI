@@ -35,7 +35,9 @@ pip install -e .
 python3 -m pypokergui serve ./poker_conf.yaml --port 8000 --speed fast
 ```
 Then you can use GUI.
+
 fish player : always call
+
 strategy player : our agent
 
 ## Reference
