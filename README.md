@@ -10,6 +10,8 @@ First, execute the following instruction to install the required packages.
 
 ```
 pip3 install -r requirements.txt
+git clone https://github.com/CubeMan940331/PyPokerEngine.git
+pip install -e .
 ```
 
 For the agent training , execute the game by typing
@@ -24,7 +26,7 @@ Then, execute the game by typing
 python3 test.py
 ```
 
-## GUI的使用
+## GUI support
 
 
 ```

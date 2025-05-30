@@ -38,7 +38,7 @@ class DeepCFRPlayer(BasePokerPlayer):
     def declare_action(self, valid_actions, hole_card, round_state):
         """Decide an action (fold, call, or raise) based on regret network output and regret matching."""
         # Encode the current state from our perspective
-        state_vec = encode_state(self.uuid, hole_card, round_state)
+        state_vec = encode_state(self.uuid, hole_card, round_state, valid_actions)
         # Convert to torch tensor for network input
         state_tensor = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)  # add batch dimension
         # Get regret values for actions from the regret network
@@ -75,6 +75,7 @@ class DeepCFRPlayer(BasePokerPlayer):
         # Choose an action according to the probabilities (stochastic policy)
         actions_list = list(strategy_dist.keys())
         probs_list = [strategy_dist[a] for a in actions_list]
+        # print(probs_list)
         chosen_action = random.choices(actions_list, weights=probs_list, k=1)[0]
         # Determine the amount for the chosen action
         if chosen_action == 'fold':

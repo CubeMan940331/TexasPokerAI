@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from pypokerengine.api.emulator import Emulator
 from pypokerengine.utils.game_state_utils import restore_game_state, attach_hole_card, attach_hole_card_from_deck
 from pypokerengine.utils.card_utils import gen_cards
@@ -27,7 +28,7 @@ def compute_counterfactual_regrets(players, payoffs, initial_stack, small_blind,
             hole_cards = decision["hole_card"]
             actual_payoff = payoffs.get(player_uuid, 0)
             # Prepare a regret vector for [raise, call, fold]
-            regret_vec = [0.0, 0.0, 0.0]
+            regret_vec = np.zeros(len(DeepCFRPlayer.ACTIONS_ORDER), dtype=np.float32)
             # Simulate each alternative action that was available at this decision
             for alt_action in allowed_actions:
                 if alt_action == actual_action:
@@ -53,7 +54,7 @@ def compute_counterfactual_regrets(players, payoffs, initial_stack, small_blind,
                         game_state = attach_hole_card(game_state, pl.uuid, gen_cards(opp_hole))
                 # Initialize emulator and register players (using their current strategy behavior)
                 emulator = Emulator()
-                emulator.set_game_rule(len(players), max_round=1, small_blind_amount=small_blind, ante_amount=ante)
+                emulator.set_game_rule(len(players), max_round=1000, small_blind_amount=small_blind, ante_amount=ante)
                 if blind_structure:
                     emulator.set_blind_structure(blind_structure)
                 for pl in players:
