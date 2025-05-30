@@ -26,7 +26,7 @@ Then, execute the game by typing
 python3 test.py
 ```
 
-## GUI的使用
+## GUI support
 
 
 ```
