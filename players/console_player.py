@@ -14,20 +14,36 @@ class ConsolePlayer(BasePokerPlayer):  # Do not forget to make parent class as "
             { "action" : "raise", "amount" : raise_to_amount}
         ]
         '''
-        print(f"console player: {self.name} acting")
+        print(f"\n==== console player: {self.name} acting ====")
+        print(valid_actions)
+        print(round_state)
         print(hole_card)
         for action in valid_actions:
             if action["action"]=="call": call_amount=action["amount"]
             elif action["action"]=="raise": raise_amount=action["amount"]
         
+        action = ""
+        amount = -1
         while True:
             op = input("choose an action: ")
             if op=='r':
                 if raise_amount<0: print("invalid raise")
-                else: return "raise", raise_amount
-            elif op=='c': return "call", call_amount
-            elif op=='f': return "fold", 0
+                else:
+                    action="raise"
+                    amount=raise_amount
+                    break
+            elif op=='c':
+                action="call"
+                amount=call_amount
+                break
+            elif op=='f':
+                action="fold"
+                amount=0
+                break
             else: print("invalid action")
+        
+        print("=============================================\n")
+        return action, amount
 
     def receive_game_start_message(self, game_info): pass
     def receive_round_start_message(self, round_count, hole_card, seats): pass
