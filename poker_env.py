@@ -52,6 +52,7 @@ class PokerEnv:
         self.round:int = 0
         self.street:int = PokerStreet.init
         self.is_betting:bool = False
+        self.agree_amount:int = 0
         
         self.act_idx:int = 0
         self.btn_idx:int = 0
@@ -73,8 +74,6 @@ class PokerEnv:
             print(f"\t{vars(self.players[i])}")
         print("==========================")
     
-    def agree_amount(self) -> int:
-        return max(p.paid for p in self.players)
     def pot(self) -> int:
         return sum(p.paid for p in self.players)
     def shared_cards(self) -> list:
@@ -92,9 +91,9 @@ class PokerEnv:
         return []
     def raise_to(self) -> int:
         if self.street==PokerStreet.preflop or self.street==PokerStreet.flop:
-            return self.agree_amount()+self.small_blind*2
+            return self.agree_amount+self.small_blind*2
         elif self.street==PokerStreet.turn or self.street==PokerStreet.river:
-            return self.agree_amount()+self.small_blind*4
+            return self.agree_amount+self.small_blind*4
         return -1
     def valid_action(self) -> list[bool]:
         '''
@@ -132,12 +131,17 @@ class PokerEnv:
             # apply the action
             if action==PokerAction.a_fold:
                 self.players[self.act_idx].is_fold=True
+                
+                # goto finish
+                self.is_betting=False
+                self.street=PokerStreet.finish
+                return
             
             elif action==PokerAction.a_call:
                 self.players[self.act_idx].is_agree=True
                 
                 pay_amount = min(
-                    self.agree_amount() - self.players[self.act_idx].paid,
+                    self.agree_amount - self.players[self.act_idx].paid,
                     self.players[self.act_idx].stack
                 )
                 self.players[self.act_idx].pay(pay_amount)
@@ -147,6 +151,7 @@ class PokerEnv:
                     self.players[i].is_agree=False
                 
                 raise_to = self.raise_to()
+                self.agree_amount = raise_to
                 pay_amount = raise_to-self.players[self.act_idx].paid
                 self.players[self.act_idx].pay(pay_amount)
                 
@@ -184,10 +189,13 @@ class PokerEnv:
             # shuffle cards
             random.shuffle(self.cards)
             # pay small blind
-            self.players[self.btn_idx].pay(self.small_blind)
+            pay_amount = min(self.small_blind, self.players[self.btn_idx].paid)
+            self.players[self.btn_idx].pay(pay_amount)
             # pay big blind
-            self.players[(self.btn_idx+1)%2].pay(self.small_blind*2)
-
+            pay_amount = min(self.small_blind*2, self.players[(self.btn_idx+1)%2].paid)
+            self.players[(self.btn_idx+1)%2].pay(pay_amount)
+            # set agree amount
+            self.agree_amount=self.small_blind*2            
             for i in range(2): self.players[i].is_fold=False
 
             self.street=PokerStreet.preflop
@@ -226,7 +234,7 @@ class PokerEnv:
 
             # transfer money
             for i in range(2):
-                if not self.players[i].is_live:
+                if (not self.players[i].is_live) or self.players[i].is_fold:
                     self.players[i].hand_rank=-1
                     continue
                 self.players[i].hand_rank=evaluate_cards(
