@@ -12,12 +12,6 @@ from memory.strategy_memory import StrategyMemory
 from engine.runner import CFRRunner
 from traverse.traverse import compute_counterfactual_regrets
 
-# def compute_accuracy(pred_probs, target_probs):
-#     pred_actions = torch.argmax(pred_probs, dim=1)
-#     target_actions = torch.argmax(target_probs, dim=1)
-#     correct = (pred_actions == target_actions).sum().item()
-#     return correct / len(pred_actions)
-
 if __name__ == "__main__":
     input_dim = 113  # state vector length (52 hole + 52 board + 4 street + 4 numeric features)
     regret_net = RegretNet(input_dim)
@@ -31,10 +25,10 @@ if __name__ == "__main__":
     ante = 0
     runner = CFRRunner(regret_net, strategy_net, initial_stack=initial_stack, small_blind=small_blind, ante=ante)
     # Hyperparameters for training
-    num_iterations = 4
-    episodes_per_iteration = 100
-    regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.0001)
-    strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.0001)
+    num_iterations = 10
+    episodes_per_iteration = 500
+    regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.001)
+    strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.001)
     # Deep CFR training loop
     for it in trange(num_iterations,desc="Training Iterations"):
         # Self-play to collect episodes
@@ -48,16 +42,15 @@ if __name__ == "__main__":
                                                            blind_structure=runner.blind_structure)
             # Store regrets and strategy data from the episode
             for state_vec, regret_vec in regret_samples:
-                regret_vec = np.clip(regret_vec, -100, 100)
+                regret_vec = np.clip(regret_vec, -10, 10)
                 regret_memory.add(state_vec, regret_vec)
             for p in players:
                 for decision in p.episode_history:
                     strategy_memory.add(decision["state_vec"], decision["strategy"])
-                    # print(decision["state_vec"], decision["strategy"])
         # Train the regret network on collected regret samples
         if len(regret_memory) > 0:
             loss_fn = nn.MSELoss()
-            batch_size = 128
+            batch_size = 2048
             random.shuffle(regret_memory.memory)
             for i in range(0, len(regret_memory.memory), batch_size):
                 batch = regret_memory.memory[i:i+batch_size]
@@ -70,15 +63,12 @@ if __name__ == "__main__":
                 regret_optimizer.step()
         # Clear regret memory (do not carry over to next iteration)
         regret_memory.clear()
-        # print(f"Iteration {it+1}/{num_iterations} complete.")
     # After iterations, train the strategy network on all accumulated strategy samples (average strategy)
     if len(strategy_memory) > 0:
-        batch_size = 128
+        batch_size = 2048
         # for s, pi in strategy_memory.memory[:10]:
         #     print(pi)
         for epoch in range(3):
-            total_loss = 0.0
-            total_acc = 0.0
             random.shuffle(strategy_memory.memory)
             for i in range(0, len(strategy_memory.memory), batch_size):
                 batch = strategy_memory.memory[i:i+batch_size]
@@ -86,15 +76,9 @@ if __name__ == "__main__":
                 target_strategy_batch = torch.tensor(np.array([dist for (_, dist) in batch]), dtype=torch.float32)
                 pred = strategy_net(state_batch)
                 loss = nn.MSELoss()(pred, target_strategy_batch)
-                # acc = compute_accuracy(pred, target_strategy_batch)
                 strategy_optimizer.zero_grad()
                 loss.backward()
                 strategy_optimizer.step()
-            #     total_loss += loss.item()
-            #     total_acc += acc
-            # avg_loss = total_loss / (len(strategy_memory.memory) / batch_size)
-            # avg_acc = total_acc / (len(strategy_memory.memory) / batch_size)
-            # print(f"[Strategy Epoch {epoch+1}] Loss: {avg_loss:.4f}, Accuracy: {avg_acc*100:.2f}%")
     # Training complete. The strategy_net can now be used for decisions or evaluation.
     os.makedirs("models", exist_ok=True)
     torch.save(strategy_net.state_dict(), "models/strategy_net.pt")

@@ -54,7 +54,7 @@ def compute_counterfactual_regrets(players, payoffs, initial_stack, small_blind,
                         game_state = attach_hole_card(game_state, pl.uuid, gen_cards(opp_hole))
                 # Initialize emulator and register players (using their current strategy behavior)
                 emulator = Emulator()
-                emulator.set_game_rule(len(players), max_round=1000, small_blind_amount=small_blind, ante_amount=ante)
+                emulator.set_game_rule(len(players), max_round=1, small_blind_amount=small_blind, ante_amount=ante)
                 if blind_structure:
                     emulator.set_blind_structure(blind_structure)
                 for pl in players:
