@@ -19,7 +19,7 @@ For the agent training , execute the game by typing
 python3 main.py
 ```
 
-You will get model/regret_net.pt and strategy_net.pt.
+You will get model/strategy_net.pt and the plot of acc/miss.
 
 Then, execute the game by typing
 ```
