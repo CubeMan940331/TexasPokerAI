@@ -26,6 +26,8 @@ TexasPokerAI
 |   └── strategy_memory.py
 ├── traverse
 │   └── traverse.py
+├── models
+│   └── strategy_net.pt (After training)
 ├── requirements.txt
 └── players
     ├── console_player.py
