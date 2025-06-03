@@ -13,7 +13,7 @@ from engine.runner import CFRRunner
 from traverse.traverse import compute_counterfactual_regrets
 
 if __name__ == "__main__":
-    input_dim = 113  # state vector length (52 hole + 52 board + 4 street + 4 numeric features)
+    input_dim = 113  # state vector length (52 hole + 52 board + 4 street + 5 numeric features)
     regret_net = RegretNet(input_dim)
     strategy_net = StrategyNet(input_dim)
     # Initialize replay memories for regret and strategy samples
@@ -25,8 +25,8 @@ if __name__ == "__main__":
     ante = 0
     runner = CFRRunner(regret_net, strategy_net, initial_stack=initial_stack, small_blind=small_blind, ante=ante)
     # Hyperparameters for training
-    num_iterations = 10
-    episodes_per_iteration = 50
+    num_iterations = 1
+    episodes_per_iteration = 5
     regret_optimizer = optim.Adam(regret_net.parameters(), lr=0.001)
     strategy_optimizer = optim.Adam(strategy_net.parameters(), lr=0.001)
     # Deep CFR training loop

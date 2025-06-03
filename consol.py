@@ -37,7 +37,7 @@ def print_probs(raw, probs, choice):
 
 def main():
     model = StrategyNet(input_dim=113)
-    model.load_state_dict(torch.load("models/10500.pt"))
+    model.load_state_dict(torch.load("models/strategy_net.pt"))
     model.eval()
 
     print("Enter '0' to quit.\n")
